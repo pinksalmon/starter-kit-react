@@ -20,3 +20,4 @@ export const BasicPage: FunctionComponent<BasicPageProps> = () => {
         </div>
     )
 };
+
