@@ -13,6 +13,9 @@ module.exports = {
       filename: 'bundle.js',
       path: path.resolve(__dirname, 'dist')
    },
+   devServer: {
+      historyApiFallback: true
+   },
    //devtool: "source-map",
    plugins: [
       new CopyWebpackPlugin({ 
