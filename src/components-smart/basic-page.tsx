@@ -3,9 +3,9 @@ import React, { FunctionComponent } from "react";
 import { useAsync } from "../hooks/use-async";
 import { getAnimals } from "../api/get-animals";
 
-type HomePageProps = {}
+type BasicPageProps = {}
 
-export const HomePage: FunctionComponent<HomePageProps> = () => {
+export const BasicPage: FunctionComponent<BasicPageProps> = () => {
     const [data, isLoading, isLoaded, refetch] = useAsync(getAnimals);
 
     return (
