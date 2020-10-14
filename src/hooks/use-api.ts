@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 
-type UseApiHookResponse<T, K extends any[]> = [
+export type UseApiHookResponse<T, K extends any[]> = [
     T | undefined, // response type
     boolean, // isLoading
     boolean, // isLoaded
     (...args: K) => void // re-call function
 ];
 
-type UseApiHookConfig<K extends any[]> = {
+export type UseApiHookConfig<K extends any[]> = {
     args?: K,
     when?: boolean[]
 }
