@@ -1,11 +1,11 @@
 import { render } from 'react-dom';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import * as React from 'react';
-import { BasicPage } from './components-smart/basic-page';
+import { HomePage } from './pages/home';
 
 const routes = (
     <Switch>
-        <Route path="/" component={BasicPage} />
+        <Route path="/" component={HomePage} />
     </Switch>
 )
 
