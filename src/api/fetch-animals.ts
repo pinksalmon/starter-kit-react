@@ -1,7 +1,9 @@
-const mockAnimals = [
-    'Zebra',
-    'Gorilla',
-    'Rabbit'
+type Animal = { id: number, name: string };
+
+const mockAnimals: Animal[] = [
+    { id: 1, name: 'Rhino' },
+    { id: 2, name: 'Zebra' },
+    { id: 3, name: 'Gorilla' },
 ];
 
 export const fetchAnimals = (numToFetch?: number) => 

@@ -4,26 +4,64 @@ export type UseApiHookResponse<T, K extends any[]> = [
     T | undefined, // response type
     boolean, // isLoading
     boolean, // isLoaded
-    (...args: K) => void // re-call function
+    (...args: K) => void, // re-call function
+    { [index:number]: T } // map of data for quicker reads
 ];
 
 export type UseApiHookConfig<K extends any[]> = {
     args?: K,
-    when?: boolean[]
+    when?: boolean[], 
+    key?: string
 }
 
 export const useApi = <T, K extends any[]>(getPromise: (...args: K) => Promise<T>, useApiConfig?: UseApiHookConfig<K>) => { 
-    const [ didAsyncOperation, setDidAsyncOperation ] = useState(false);
+    const [ didHandleInitialRequest, setDidHandleInitialRequest ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ isLoaded, setIsLoaded ] = useState(false);
     const [ data, setData ] = useState<T>();
+    const [ dataMap, setDataMap ] = useState<{ [index:number]: T }>({});
+
+    const makeMapFromData = (data: T) => {
+        const result: { [index:number]: T } = {};
+
+        if (Array.isArray(data)) {
+            const keyName = useApiConfig?.key || 'id';
+            data.forEach(d => {
+                const key = d[keyName];
+                result[key] = d;
+            });
+        }
+
+        return result;
+    }
+
+    const handlePromise = (promise: Promise<T>) => 
+        promise
+            .then((response) => {
+                setData(response);
+                const dataMap = makeMapFromData(response);
+                setDataMap(dataMap);
+                setIsLoading(false);
+                setIsLoaded(true);
+            })
+            .catch((e) => {
+                setIsLoading(false);
+                throw e;
+            })
+
+    function refetch(...args: K) {
+        setIsLoading(true);
+        setIsLoaded(false);
+        const promise = ((getPromise as any).apply(null, arguments) as Promise<any>);
+        handlePromise(promise);
+    }
 
     useEffect(() => {
-        if (didAsyncOperation)
+        if (didHandleInitialRequest)
             return;
 
         if (useApiConfig?.when == undefined || useApiConfig?.when.every(d => d)) {
-            setDidAsyncOperation(true);
+            setDidHandleInitialRequest(true);
 
             let promise: Promise<T>;
 
@@ -33,36 +71,11 @@ export const useApi = <T, K extends any[]>(getPromise: (...args: K) => Promise<T
                 promise = (getPromise as any)();
             }
 
-            promise
-                .then((response) => {
-                    setData(response);
-                    setIsLoading(false);
-                    setIsLoaded(true);
-                })
-                .catch((e) => {
-                    setIsLoading(false);
-                    throw e;
-                })
+            handlePromise(promise);
         }
-    })
+    });
 
-    function refetch(...args: K) {
-        setIsLoading(true);
-        setIsLoaded(false);
-
-        ((getPromise as any).apply(null, arguments) as Promise<any>)
-            .then((response) => {
-                setData(response);
-                setIsLoading(false);
-                setIsLoaded(true);
-            })
-            .catch((e) => {
-                setIsLoading(false);
-                throw e;
-            })
-    }
-
-    const hookResponse: UseApiHookResponse<T, K> = [data, isLoading, isLoaded, refetch];
+    const hookResponse: UseApiHookResponse<T, K> = [ data, isLoading, isLoaded, refetch, dataMap ];
 
     return hookResponse;
 }
