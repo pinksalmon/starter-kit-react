@@ -84,7 +84,11 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
 
     useApiHookData = (data ? [...data] : []) as any;
     useApiHookData!.asMap = dataMap;
-    useApiHookData!.setState = setData;
+    useApiHookData!.setState = (t) => {
+        setData(t)
+        const dataMap = makeMapFromData(t);
+        setDataMap(dataMap);
+    };
 
     const hookResponse: UseApiHookResponse<T, K> = [ useApiHookData, isLoading, isLoaded, refetch ];
 
