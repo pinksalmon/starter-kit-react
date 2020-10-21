@@ -1,5 +1,5 @@
 import { types, flow } from "mobx-state-tree";
-import { fetchAnimals } from "../../api/fetch-animals";
+import { fetchAnimals } from "../../../api/fetch-animals";
 
 const storeAnimal = types
     .model("animal", {

@@ -1,6 +1,6 @@
 import React, { CSSProperties } from "react";
-import { LoadingDots } from "../../components/loading-dots/loading-dots";
-import { Animal } from "../../types/animal";
+import { LoadingDots } from "../../../components/loading-dots/loading-dots";
+import { Animal } from "../../../types/animal";
 
 interface IAnimalListPanelProps {
     panelTitle: string;

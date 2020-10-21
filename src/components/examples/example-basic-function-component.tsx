@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { fetchAnimals } from "../api/fetch-animals";
-import { Animal } from "../types/animal";
+import { fetchAnimals } from "../../api/fetch-animals";
+import { Animal } from "../../types/animal";
 import { AnimalListPanel } from "./example-toolbox/animal-list-panel";
 
 export const BasicFunctionComponent = () => {

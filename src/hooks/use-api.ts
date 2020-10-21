@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 type UseApiHookData<T extends any[]> = 
     T & {
         asMap: { [index:number]: T[0] },
-        setState: React.Dispatch<React.SetStateAction<T | undefined>>
+        setState: (t: T | undefined) => void
     }
 
 export type UseApiHookResponse<T extends any[], K extends any[]> = [
@@ -26,7 +26,7 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
     const [ data, setData ] = useState<T>();
     const [ dataMap, setDataMap ] = useState<{ [index:number]: T }>({});
 
-    const makeMapFromData = (data: T) => {
+    const makeMapFromData = (data?: T) => {
         const result: { [index:number]: T } = {};
 
         if (data) {

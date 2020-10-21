@@ -1,9 +1,9 @@
 import './home.less';
 import React from "react";
-import { BasicClassComponent } from "../examples/example-basic-class-component";
-import { BasicFunctionComponent } from "../examples/example-basic-function-component";
-import { BasicFluxComponent } from "../examples/example-flux-based-component";
-import { UseApiHookComponent } from "../examples/example-use-api-hook";
+import { BasicClassComponent } from '../components/examples/example-basic-class-component';
+import { BasicFunctionComponent } from '../components/examples/example-basic-function-component';
+import { BasicFluxComponent } from '../components/examples/example-flux-based-component';
+import { UseApiHookComponent } from '../components/examples/example-use-api-hook';
 
 export const HomePage = () => {
     return (
