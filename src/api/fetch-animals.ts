@@ -9,5 +9,5 @@ export const fetchAnimals = () => new Promise<Animal[]>(resolve => {
 
     setTimeout(() => {
         resolve(mockAnimals);
-    } , 10000);
+    } , 5000);
 });

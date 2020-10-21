@@ -10,19 +10,22 @@ export type UseApiHookResponse<T extends any[], K extends any[]> = [
     UseApiHookData<T>, // response data type
     boolean, // isLoading
     boolean, // isLoaded
+    boolean, // hasError
     (...args: K) => void, // handle to call api function, updating hook state data if appropriate
 ];
 
 export type UseApiHookConfig<K extends any[]> = {
     args?: K,
     when?: boolean[], 
-    key?: string
+    key?: string,
+    onError?: (e: any) => void
 }
 
 export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K) => Promise<T>, useApiConfig?: UseApiHookConfig<K>) => { 
     const [ didHandleInitialRequest, setDidHandleInitialRequest ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ isLoaded, setIsLoaded ] = useState(false);
+    const [ hasError, setHasError ] = useState(false);
     const [ data, setData ] = useState<T>();
     const [ dataMap, setDataMap ] = useState<{ [index:number]: T }>({});
 
@@ -51,10 +54,17 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
             })
             .catch((e) => {
                 setIsLoading(false);
+                setHasError(true);
+
+                if (useApiConfig?.onError) {
+                    useApiConfig.onError(e);
+                }
+
                 throw e;
             })
 
     function refetch(...args: K) {
+        setHasError(false);
         setIsLoading(true);
         setIsLoaded(false);
         const promise = ((getPromise as any).apply(null, arguments) as Promise<any>);
@@ -82,7 +92,7 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
 
     let useApiHookData: UseApiHookData<T>;
 
-    useApiHookData = (data ? [...data] : []) as any;
+    useApiHookData = [...(data || [])] as any;
     useApiHookData!.asMap = dataMap;
     useApiHookData!.setState = (t) => {
         setData(t)
@@ -90,7 +100,7 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
         setDataMap(dataMap);
     };
 
-    const hookResponse: UseApiHookResponse<T, K> = [ useApiHookData, isLoading, isLoaded, refetch ];
+    const hookResponse: UseApiHookResponse<T, K> = [ useApiHookData, isLoading, isLoaded, hasError, refetch ];
 
     return hookResponse;
 }
