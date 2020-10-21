@@ -16,28 +16,39 @@ const rootStyles: CSSProperties = {
     alignItems: "center",
     justifyContent: "center",
     width: "300px",
-    padding: "16px",
     fontSize: '24px'
+}
+
+const panelTitleStyles: CSSProperties = {
+    padding: '16px',
+    borderBottom: '2px solid rgb(187, 187, 187)',
+    width: '100%',
+    boxSizing: 'border-box',
+    textAlign: 'center'
+}
+
+const panelContentStyles: CSSProperties = {
+    padding: '16px',
 }
 
 export const AnimalListPanel = (props: IAnimalListPanelProps) => (
     <div style={rootStyles}>
-        <div className="panel-title" style={{ paddingBottom: "16px", marginBottom: "16px", borderBottom: "2px solid #bbb"}}>
+        <div className="panel-title" style={panelTitleStyles}>
             {props.panelTitle}
         </div>
 
-        {props.isLoadingAnimals && (
-            <div>
-                Loading animals
-                <LoadingDots />
-            </div>
-        )}
-
-        {!props.isLoadingAnimals && props.animals.map(animal => (
-            <div key={animal.id}>
-                {animal.name}
-            </div>
-        ))}
-
+        <div className="panel-content" style={panelContentStyles}>
+            {props.isLoadingAnimals && (
+                <div>
+                    Loading animals
+                    <LoadingDots />
+                </div>
+            )}
+            {!props.isLoadingAnimals && props.animals.map(animal => (
+                <div key={animal.id}>
+                    {animal.name}
+                </div>
+            ))}
+        </div>
     </div>
 )
