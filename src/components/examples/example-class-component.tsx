@@ -9,7 +9,7 @@ interface IState {
     animals: Animal[]
 }
 
-export class BasicClassComponent extends Component<{}, IState> {
+export class ExampleClassComponent extends Component<{}, IState> {
     state: IState = {
         isLoadingAnimals: true,
         animals: []

@@ -4,7 +4,7 @@ import { fetchAnimals } from "../../api/fetch-animals";
 import { AnimalListPanel } from "./example-toolbox/animal-list-panel";
 import { useApi } from "../../hooks/use-api";
 
-export const UseApiHookComponent = () => {
+export const ExampleUseApiComponent = () => {
     const [ animals, isLoadingAnimals ] = useApi(fetchAnimals);
 
     return (

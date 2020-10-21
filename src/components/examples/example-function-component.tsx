@@ -4,7 +4,7 @@ import { fetchAnimals } from "../../api/fetch-animals";
 import { Animal } from "../../types/animal";
 import { AnimalListPanel } from "./example-toolbox/animal-list-panel";
 
-export const BasicFunctionComponent = () => {
+export const ExampleFunctionComponent = () => {
     const [isLoadingAnimals, setIsLoadingAnimals] = useState(true);
     const [animals, setAnimals] = useState<Animal[]>([]);
 

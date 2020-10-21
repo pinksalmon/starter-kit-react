@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { AnimalListPanel } from "./example-toolbox/animal-list-panel";
 import { store } from "./example-toolbox/animal-store";
 
-export const BasicFluxComponent = observer(() => {
+export const ExampleFluxComponent = observer(() => {
     useEffect(() => {
         store.loadAnimals();
     }, []);

@@ -1,18 +1,18 @@
 import './home.less';
 import React from "react";
-import { BasicClassComponent } from '../components/examples/example-basic-class-component';
-import { BasicFunctionComponent } from '../components/examples/example-basic-function-component';
-import { BasicFluxComponent } from '../components/examples/example-flux-based-component';
-import { UseApiHookComponent } from '../components/examples/example-use-api-hook';
+import { ExampleClassComponent } from '../components/examples/example-class-component';
+import { ExampleFunctionComponent } from '../components/examples/example-function-component';
+import { ExampleFluxComponent } from '../components/examples/example-flux-component';
+import { ExampleUseApiComponent } from '../components/examples/example-use-api-component';
 
 export const HomePage = () => {
     return (
         <div className="home-page">
             <div className="examples-row">
-                <BasicClassComponent />
-                <BasicFunctionComponent />
-                <BasicFluxComponent />
-                <UseApiHookComponent />
+                <ExampleClassComponent />
+                <ExampleFunctionComponent />
+                <ExampleFluxComponent />
+                <ExampleUseApiComponent />
             </div>
         </div>
     )
