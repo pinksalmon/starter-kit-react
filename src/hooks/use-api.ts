@@ -14,14 +14,15 @@ export type UseApiHookResponse<T extends any[], K extends any[]> = [
     (...args: K) => void, // handle to call api function, updating hook state data if appropriate
 ];
 
-export type UseApiHookConfig<K extends any[]> = {
+export type UseApiHookConfig<T, K extends any[]> = {
     args?: K,
     when?: boolean[], 
     key?: string,
-    onError?: (e: any) => void
+    onError?: (e: any) => void,
+    onSuccess?: (response: T) => void
 }
 
-export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K) => Promise<T>, useApiConfig?: UseApiHookConfig<K>) => { 
+export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K) => Promise<T>, useApiConfig?: UseApiHookConfig<T, K>) => { 
     const [ didHandleInitialRequest, setDidHandleInitialRequest ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ isLoaded, setIsLoaded ] = useState(false);
@@ -51,6 +52,10 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
                 setDataMap(dataMap);
                 setIsLoading(false);
                 setIsLoaded(true);
+
+                if (useApiConfig?.onSuccess) {
+                    useApiConfig.onSuccess(response);
+                }
             })
             .catch((e) => {
                 setIsLoading(false);
