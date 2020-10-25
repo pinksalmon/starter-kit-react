@@ -1,30 +1,31 @@
 import { useState, useEffect } from 'react';
 
-type UseApiHookData<T extends any[]> = 
-    T & {
-        asMap: { [index:number]: T[0] },
-        setState: (t: T | undefined) => void
-    }
+type UseApiHookData<T extends any[]> = {
+    data: T
+    map: { [index:number]: T[0] }
+    isLoading: boolean
+    isLoaded: boolean
+    hasError: boolean
+}
 
-type UseApiHookDataScalar<T> = 
-    T & {
-        setState: (t: T | undefined) => void
-    }
+type UseApiHookDataScalar<T> = {
+    data: T
+    map: { [index:number]: T }
+    isLoading: boolean
+    isLoaded: boolean
+    hasError: boolean
+}
 
 export type UseApiHookResponse<T extends any[], K extends any[]> = [
-    UseApiHookData<T>, // response data type
-    boolean, // isLoading
-    boolean, // isLoaded
-    boolean, // hasError
-    (...args: K) => void, // handle to call api function, updating hook state data if appropriate
+    UseApiHookData<T>, // hook data
+    (data: T) => void, // set data
+    (...args: K) => void, // api caller
 ];
 
 export type UseApiHookResponseScalar<T, K extends any[]> = [
-    UseApiHookDataScalar<T>, // response data type
-    boolean, // isLoading
-    boolean, // isLoaded
-    boolean, // hasError
-    (...args: K) => void, // handle to call api function, updating hook state data if appropriate
+    UseApiHookDataScalar<T>, // hook data
+    (data: T) => void, // set data
+    (...args: K) => void, // api caller
 ];
 
 export type UseApiHookConfig<T, K extends any[]> = {
@@ -46,13 +47,19 @@ const _useApi = (getPromise: any, useApiConfig: any) => {
     const makeMapFromData = (data: any) => {
         const result: { [index:number]: any } = {};
 
-        if (data && Array.isArray(data)) {
-            const keyName = useApiConfig?.key || 'id';
-            data.forEach(d => {
-                const key = d[keyName];
-                result[key] = d;
-            });
-        }
+        if (!data) 
+            return result;
+
+        const arrayOfData = Array.isArray(data)
+            ? data
+            : [data]
+
+        const keyName = useApiConfig?.key || 'id';
+
+        arrayOfData.forEach(d => {
+            const key = d[keyName];
+            result[key] = d;
+        });
 
         return result;
     }
@@ -79,15 +86,7 @@ const _useApi = (getPromise: any, useApiConfig: any) => {
                 }
 
                 throw e;
-            })
-
-    function refetch() {
-        setHasError(false);
-        setIsLoading(true);
-        setIsLoaded(false);
-        const promise = ((getPromise as any).apply(null, arguments) as Promise<any>);
-        handlePromise(promise);
-    }
+            });
 
     useEffect(() => {
         if (didHandleInitialRequest)
@@ -106,19 +105,29 @@ const _useApi = (getPromise: any, useApiConfig: any) => {
         }
     });
 
-    if (Array.isArray(data)) {
-        (data as any).asMap = dataMap;
+    const useApiHookData = { 
+        data,
+        map: dataMap,
+        isLoading,
+        isLoaded,
+        hasError
+    };
+
+    const exposedSetData = (t: any) => {
+        setData(t);
+        const dataMap = makeMapFromData(t);
+        setDataMap(dataMap);
+    };
+
+    function refetch() {
+        setHasError(false);
+        setIsLoading(true);
+        setIsLoaded(false);
+        const promise = ((getPromise as any).apply(null, arguments) as Promise<any>);
+        handlePromise(promise);
     }
 
-    if (data) {
-        data.setState = (t: any) => {
-            setData(t);
-            const dataMap = makeMapFromData(t);
-            setDataMap(dataMap);
-        };
-    }
-
-    return [ data, isLoading, isLoaded, hasError, refetch ];
+    return [ useApiHookData, exposedSetData, refetch ];
 }
 
 let useApi: <T extends any[], K extends any[]>(
