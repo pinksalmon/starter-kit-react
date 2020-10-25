@@ -6,8 +6,21 @@ type UseApiHookData<T extends any[]> =
         setState: (t: T | undefined) => void
     }
 
+type UseApiHookDataScalar<T> = 
+    T & {
+        setState: (t: T | undefined) => void
+    }
+
 export type UseApiHookResponse<T extends any[], K extends any[]> = [
     UseApiHookData<T>, // response data type
+    boolean, // isLoading
+    boolean, // isLoaded
+    boolean, // hasError
+    (...args: K) => void, // handle to call api function, updating hook state data if appropriate
+];
+
+export type UseApiHookResponseScalar<T, K extends any[]> = [
+    UseApiHookDataScalar<T>, // response data type
     boolean, // isLoading
     boolean, // isLoaded
     boolean, // hasError
@@ -22,18 +35,18 @@ export type UseApiHookConfig<T, K extends any[]> = {
     onSuccess?: (response: T) => void
 }
 
-export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K) => Promise<T>, useApiConfig?: UseApiHookConfig<T, K>) => { 
+const _useApi = (getPromise: any, useApiConfig: any) => {
     const [ didHandleInitialRequest, setDidHandleInitialRequest ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ isLoaded, setIsLoaded ] = useState(false);
     const [ hasError, setHasError ] = useState(false);
-    const [ data, setData ] = useState<T>();
-    const [ dataMap, setDataMap ] = useState<{ [index:number]: T }>({});
+    const [ data, setData ] = useState<any>();
+    const [ dataMap, setDataMap ] = useState<{ [index:number]: any }>({});
 
-    const makeMapFromData = (data?: T) => {
-        const result: { [index:number]: T } = {};
+    const makeMapFromData = (data: any) => {
+        const result: { [index:number]: any } = {};
 
-        if (data) {
+        if (data && Array.isArray(data)) {
             const keyName = useApiConfig?.key || 'id';
             data.forEach(d => {
                 const key = d[keyName];
@@ -44,7 +57,7 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
         return result;
     }
 
-    const handlePromise = (promise: Promise<T>) => 
+    const handlePromise = (promise: Promise<any>) => 
         promise
             .then((response) => {
                 setData(response);
@@ -68,7 +81,7 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
                 throw e;
             })
 
-    function refetch(...args: K) {
+    function refetch() {
         setHasError(false);
         setIsLoading(true);
         setIsLoaded(false);
@@ -80,32 +93,46 @@ export const useApi = <T extends any[], K extends any[]>(getPromise: (...args: K
         if (didHandleInitialRequest)
             return;
 
-        if (useApiConfig?.when == undefined || useApiConfig?.when.every(d => d)) {
+        const areWinConditionsSatisfied = useApiConfig?.when == undefined || useApiConfig?.when.every((d: any) => d);
+
+        if (areWinConditionsSatisfied) {
             setDidHandleInitialRequest(true);
 
-            let promise: Promise<T>;
-
-            if (useApiConfig?.args != undefined) {
-                promise = getPromise(...useApiConfig?.args);
-            } else {
-                promise = (getPromise as any)();
-            }
+            const promise = useApiConfig?.args != undefined
+                ? getPromise(...useApiConfig?.args)
+                : (getPromise as any)();
 
             handlePromise(promise);
         }
     });
 
-    let useApiHookData: UseApiHookData<T>;
+    if (Array.isArray(data)) {
+        (data as any).asMap = dataMap;
+    }
 
-    useApiHookData = [...(data || [])] as any;
-    useApiHookData!.asMap = dataMap;
-    useApiHookData!.setState = (t) => {
-        setData(t)
-        const dataMap = makeMapFromData(t);
-        setDataMap(dataMap);
-    };
+    if (data) {
+        data.setState = (t: any) => {
+            setData(t);
+            const dataMap = makeMapFromData(t);
+            setDataMap(dataMap);
+        };
+    }
 
-    const hookResponse: UseApiHookResponse<T, K> = [ useApiHookData, isLoading, isLoaded, hasError, refetch ];
-
-    return hookResponse;
+    return [ data, isLoading, isLoaded, hasError, refetch ];
 }
+
+let useApi: <T extends any[], K extends any[]>(
+    getPromise: (...args: K) => Promise<T>, 
+    useApiConfig?: UseApiHookConfig<T, K>
+) => UseApiHookResponse<T, K>;
+
+let useApiScalar: <T, K extends any[]>(
+    getPromise: (...args: K) => Promise<T>, 
+    useApiConfig?: UseApiHookConfig<T, K>
+) => UseApiHookResponseScalar<T, K>;
+
+useApi = _useApi as any;
+
+useApiScalar = _useApi as any;
+
+export { useApi, useApiScalar }
