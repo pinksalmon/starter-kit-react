@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 
-type UseApiHookData<T extends any[]> = {
+export type UseApiHookData<T extends any[]> = {
     data: T
-    map: { [index:number]: T[0] }
+    map: { [K in string | number]: T[0] }
     isLoading: boolean
     isLoaded: boolean
     hasError: boolean
 }
 
-type UseApiHookDataScalar<T> = {
+export type UseApiHookDataScalar<T> = {
     data: T
-    map: { [index:number]: T }
+    map: { [K in string | number]: T }
     isLoading: boolean
     isLoaded: boolean
     hasError: boolean
@@ -36,27 +36,35 @@ export type UseApiHookConfig<T, K extends any[]> = {
     onSuccess?: (response: T) => void
 }
 
+export type UseApiHook = <T extends any[], K extends any[]>(
+    getPromise: (...args: K) => Promise<T>, 
+    useApiConfig?: UseApiHookConfig<T, K>
+) => UseApiHookResponse<T, K>;
+
+export type UseApiScalarHook = <T, K extends any[]>(
+    getPromise: (...args: K) => Promise<T>, 
+    useApiConfig?: UseApiHookConfig<T, K>
+) => UseApiHookResponseScalar<T, K>;
+
 const _useApi = (getPromise: any, useApiConfig: any) => {
     const [ didHandleInitialRequest, setDidHandleInitialRequest ] = useState(false);
     const [ isLoading, setIsLoading ] = useState(true);
     const [ isLoaded, setIsLoaded ] = useState(false);
     const [ hasError, setHasError ] = useState(false);
     const [ data, setData ] = useState<any>();
-    const [ dataMap, setDataMap ] = useState<{ [index:number]: any }>({});
+    const [ dataMap, setDataMap ] = useState<any>({});
 
     const makeMapFromData = (data: any) => {
-        const result: { [index:number]: any } = {};
+        const result: any = {};
 
         if (!data) 
             return result;
 
-        const arrayOfData = Array.isArray(data)
-            ? data
-            : [data]
+        const dataAsArray = Array.isArray(data) ? data : [data];
 
         const keyName = useApiConfig?.key || 'id';
 
-        arrayOfData.forEach(d => {
+        dataAsArray.forEach(d => {
             const key = d[keyName];
             result[key] = d;
         });
@@ -130,18 +138,5 @@ const _useApi = (getPromise: any, useApiConfig: any) => {
     return [ useApiHookData, exposedSetData, refetch ];
 }
 
-let useApi: <T extends any[], K extends any[]>(
-    getPromise: (...args: K) => Promise<T>, 
-    useApiConfig?: UseApiHookConfig<T, K>
-) => UseApiHookResponse<T, K>;
-
-let useApiScalar: <T, K extends any[]>(
-    getPromise: (...args: K) => Promise<T>, 
-    useApiConfig?: UseApiHookConfig<T, K>
-) => UseApiHookResponseScalar<T, K>;
-
-useApi = _useApi as any;
-
-useApiScalar = _useApi as any;
-
-export { useApi, useApiScalar }
+export const useApi: UseApiHook = _useApi as any;
+export const useApiScalar: UseApiScalarHook = _useApi as any;

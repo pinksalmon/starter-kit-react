@@ -1,11 +1,11 @@
 import React from "react";
 
-import { fetchAnimals, fetchFavoriteAnimal } from "../../api/fetch-animals";
+import { fetchAnimals } from "../../api/fetch-animals";
 import { AnimalListPanel } from "./example-toolbox/animal-list-panel";
-import { useApi, useApiScalar } from "../../hooks/use-api";
+import { useApi } from "../../hooks/use-api";
 
 export const ExampleUseApiComponent = () => {
-    const [ animals, setAnimals, $fetchAnimals ] = useApi(fetchAnimals);
+    const [ animals ] = useApi(fetchAnimals);
 
     return (
         <AnimalListPanel 
